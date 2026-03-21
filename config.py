@@ -1,4 +1,4 @@
-# config.py - улучшенная версия
+# config.py - с поддержкой SOCKS5 прокси
 import os
 import re
 from dotenv import load_dotenv
@@ -8,19 +8,19 @@ load_dotenv()
 class Config:
     BOT_TOKEN = os.getenv("BOT_TOKEN", "")
     
+    # Настройка прокси
+    PROXY_URL = os.getenv("PROXY_URL", "")  # Например: socks5://user:pass@host:port
+    
     # Обработка CHANNEL_ID
     CHANNEL_ID_STR = os.getenv("CHANNEL_ID", "").strip()
     CHANNEL_ID = None
     
     if CHANNEL_ID_STR:
-        # Если это числовой ID (может быть отрицательным для каналов)
         if CHANNEL_ID_STR.lstrip('-').replace('.', '').isdigit():
             CHANNEL_ID = int(CHANNEL_ID_STR)
-        # Если это username (@channel)
         elif CHANNEL_ID_STR.startswith('@'):
             CHANNEL_ID = CHANNEL_ID_STR
         else:
-            # Пробуем извлечь ID из разных форматов
             match = re.search(r'(-?\d+)', CHANNEL_ID_STR)
             if match:
                 CHANNEL_ID = int(match.group(1))
@@ -35,10 +35,9 @@ class Config:
     
     DATABASE_URL = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///auctions.db")
     
-    BID_TIMEOUT_MINUTES = int(os.getenv("BID_TIMEOUT_MINUTES", "240"))
+    BID_TIMEOUT_MINUTES = int(os.getenv("BID_TIMEOUT_MINUTES", "180"))  # 3 часа
     BID_STEP_PERCENT = int(os.getenv("BID_STEP_PERCENT", "10"))
     
-    # Настройки для многопользовательской работы
     DATABASE_TIMEOUT = int(os.getenv("DATABASE_TIMEOUT", "60"))
     BID_RETRY_ATTEMPTS = int(os.getenv("BID_RETRY_ATTEMPTS", "3"))
     
