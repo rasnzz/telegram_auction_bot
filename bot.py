@@ -70,35 +70,37 @@ async def fix_all_channel_messages_on_startup(bot):
         logger.error(f"❌ Ошибка при проверке сообщений в канале: {e}")
 
 async def create_bot():
-    """Создание бота с поддержкой прокси (http/socks5)"""
+    """Создание бота с поддержкой прокси через aiohttp"""
     if Config.PROXY_URL:
         logger.info(f"Используется прокси: {Config.PROXY_URL.split('@')[-1] if '@' in Config.PROXY_URL else Config.PROXY_URL}")
         try:
+            from aiohttp import ClientSession, ClientTimeout
+            from aiohttp_socks import ProxyConnector
+
+            # Создаём коннектор с явными параметрами
+            connector = ProxyConnector.from_url(Config.PROXY_URL)
+            # Увеличиваем таймауты
+            timeout = ClientTimeout(total=120, connect=60, sock_read=60, sock_connect=60)
+            session = ClientSession(connector=connector, timeout=timeout)
+
             bot = Bot(
                 token=Config.BOT_TOKEN,
-                proxy=Config.PROXY_URL,
+                session=session,
                 default=DefaultBotProperties(parse_mode=ParseMode.HTML)
             )
-            # Проверка соединения
+            # Проверяем соединение
             me = await bot.get_me()
             logger.info(f"✅ Бот настроен через прокси, @{me.username}")
             return bot
         except Exception as e:
             logger.error(f"❌ Ошибка настройки прокси: {e}, пробую без прокси")
-    
+            # При ошибке закрываем сессию, если она была создана
+            if 'session' in locals():
+                await session.close()
+
     # Без прокси
     bot = Bot(
         token=Config.BOT_TOKEN,
-        default=DefaultBotProperties(parse_mode=ParseMode.HTML)
-    )
-    logger.info("✅ Бот запущен без прокси")
-    return bot
-    
-    # Без прокси
-    session = AiohttpSession()
-    bot = Bot(
-        token=Config.BOT_TOKEN,
-        session=session,
         default=DefaultBotProperties(parse_mode=ParseMode.HTML)
     )
     logger.info("✅ Бот запущен без прокси")
