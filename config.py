@@ -9,7 +9,7 @@ class Config:
     BOT_TOKEN = os.getenv("BOT_TOKEN", "")
     
     # Настройка прокси
-    PROXY_URL = os.getenv("PROXY_URL", "")  # Например: socks5://user:pass@host:port
+    PROXY_URL = os.getenv("PROXY_URL", "")
     
     # Обработка CHANNEL_ID
     CHANNEL_ID_STR = os.getenv("CHANNEL_ID", "").strip()
