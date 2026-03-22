@@ -5,9 +5,8 @@ from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
 from aiogram.client.default import DefaultBotProperties
 from aiogram.fsm.storage.memory import MemoryStorage
-from aiohttp import ClientSession, ClientTimeout, TCPConnector
+from aiohttp import ClientSession, ClientTimeout
 from aiohttp_socks import ProxyConnector
-import sys
 
 from config import Config
 from database.database import init_db
@@ -71,7 +70,6 @@ async def fix_all_channel_messages_on_startup(bot):
 
 async def create_bot():
     """Создание бота с поддержкой прокси"""
-    connector = None
     
     if Config.PROXY_URL:
         try:
@@ -85,9 +83,13 @@ async def create_bot():
                 sock_connect=60 # таймаут сокета 60 секунд
             )
             
+            # Создаём прокси-коннектор
             connector = ProxyConnector.from_url(Config.PROXY_URL)
+            
+            # Создаём сессию с коннектором
             session = ClientSession(connector=connector, timeout=timeout)
             
+            # Создаём бота с сессией
             bot = Bot(
                 token=Config.BOT_TOKEN,
                 session=session,
@@ -108,7 +110,7 @@ async def create_bot():
         except Exception as e:
             logger.error(f"❌ Ошибка настройки прокси: {e}, пробую без прокси")
     
-    # Без прокси или если прокси недоступен
+    # Без прокси
     timeout = ClientTimeout(total=60, connect=30, sock_read=30)
     session = ClientSession(timeout=timeout)
     
