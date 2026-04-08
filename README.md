@@ -55,7 +55,9 @@ pip install -r requirements.txt
 
 # Обязательные параметры
 BOT_TOKEN=1234567890:AAH...           # Токен от @BotFather
+
 CHANNEL_ID=@mychannel или -100123456  # ID канала (или username)
+
 ADMIN_IDS=123456789,987654321         # ID администраторов через запятую
 
 # Опциональные параметры (значения по умолчанию)
